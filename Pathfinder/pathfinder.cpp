@@ -20,17 +20,17 @@ struct MazeNode{
 };
 
 
-struct btNode{
+struct BTreeNode{
     MazeNode *keys[MAX + 1];         
     int count;                     
-    btNode *children[MAX + 1];  
+    BTreeNode *children[MAX + 1];  
 };
 
-btNode *root = nullptr;
+BTreeNode *root = nullptr;
 
-btNode *createNewNode(MazeNode* key, btNode *child){
+BTreeNode *createNewNode(MazeNode* key, BTreeNode *child){
 
-    btNode *newNode = new btNode;
+    BTreeNode *newNode = new BTreeNode;
     newNode->keys[1] = key;
     newNode->count = 1;
     newNode->children[0] = root;
@@ -38,7 +38,7 @@ btNode *createNewNode(MazeNode* key, btNode *child){
     return newNode;
 }
 
-void insertKeyIntoNode(MazeNode* key, int position, btNode *node, btNode *child) {
+void insertKeyIntoNode(MazeNode* key, int position, BTreeNode *node, BTreeNode *child) {
     int i;
     for ( i = node->count; i > position; i-- ) {
         node->keys[i + 1] = node->keys[i];
@@ -50,7 +50,7 @@ void insertKeyIntoNode(MazeNode* key, int position, btNode *node, btNode *child)
     node->count++;
 }
 
-void splitNode(MazeNode *key, MazeNode **prevKey, int position, btNode *node, btNode *child, btNode **newNode) {
+void splitNode(MazeNode *key, MazeNode **prevKey, int position, BTreeNode *node, BTreeNode *child, BTreeNode **newNode) {
     int splitPoint;
     int median = MIN;
 
@@ -59,7 +59,7 @@ void splitNode(MazeNode *key, MazeNode **prevKey, int position, btNode *node, bt
 
     splitPoint = median + 1;
 
-    *newNode = new btNode;
+    *newNode = new BTreeNode;
 
     while (splitPoint <= MAX) {
         (*newNode)->keys[splitPoint - median]     = node->keys[splitPoint];
@@ -84,7 +84,7 @@ void splitNode(MazeNode *key, MazeNode **prevKey, int position, btNode *node, bt
     node->count--;
 }
 
-bool AddNewKey(MazeNode *newKey, MazeNode **prevValue, btNode *node, btNode **child) {
+bool AddNewKey(MazeNode *newKey, MazeNode **prevValue, BTreeNode *node, BTreeNode **child) {
 
     int position;
 
@@ -123,7 +123,7 @@ void insert(MazeNode *newMazeNode) {
 
     bool newRoot;
     MazeNode *i;
-    btNode *child;
+    BTreeNode *child;
 
     newRoot = AddNewKey(newMazeNode, &i, root, &child);
 
@@ -131,7 +131,7 @@ void insert(MazeNode *newMazeNode) {
         root = createNewNode(i, child);
 }
 
-void removeKey(btNode *node, int position) {
+void removeKey(BTreeNode *node, int position) {
 
     for(int i= position + 1; i <= node->count; i++){
         node->keys[i - 1]     = node->keys[i];
@@ -140,9 +140,9 @@ void removeKey(btNode *node, int position) {
     node->count--;
 }
 
-void shiftKeyToChild(btNode *node, int position, char leftRight) {
+void shiftKeyToChild(BTreeNode *node, int position, char leftRight) {
     if(leftRight == 'r'){
-        btNode *x = node->children[position];
+        BTreeNode *x = node->children[position];
         int j = x->count;
 
         while (j > 0) {
@@ -164,7 +164,7 @@ void shiftKeyToChild(btNode *node, int position, char leftRight) {
 
     if(leftRight == 'l'){
         int j = 1;
-        btNode *x = node->children[position - 1];
+        BTreeNode *x = node->children[position - 1];
 
         x->count++;
         x->keys[x->count]     = node->keys[position];
@@ -184,12 +184,12 @@ void shiftKeyToChild(btNode *node, int position, char leftRight) {
     }
 }
 
-void mergeNodes(btNode *node, int position) {
+void mergeNodes(BTreeNode *node, int position) {
 
     int j;
 
-    btNode *rightNode = node->children[position];
-    btNode *leftNode  = node->children[position - 1];
+    BTreeNode *rightNode = node->children[position];
+    BTreeNode *leftNode  = node->children[position - 1];
 
     leftNode->count++;
     leftNode->keys[leftNode->count]     = node->keys[position];
@@ -210,7 +210,7 @@ void mergeNodes(btNode *node, int position) {
     free(rightNode);
 }
 
-void fixNode(btNode *node, int position) {
+void fixNode(BTreeNode *node, int position) {
 
     if (!position) {
         if (node->children[1]->count > MIN) {
@@ -248,9 +248,9 @@ void fixNode(btNode *node, int position) {
     }
 }
 
-void replaceSuccessor(btNode *deadNode, int position) {
+void replaceSuccessor(BTreeNode *deadNode, int position) {
 
-    btNode *dummy = deadNode->children[position];
+    BTreeNode *dummy = deadNode->children[position];
 
     while(dummy->children[0] != nullptr)
         dummy = dummy->children[0];
@@ -259,7 +259,7 @@ void replaceSuccessor(btNode *deadNode, int position) {
 
 }
 
-bool removeKey(MazeNode *deadMazeNode,btNode *node) {
+bool removeKey(MazeNode *deadMazeNode,BTreeNode *node) {
 
     bool flag = false;
     int position;
@@ -311,9 +311,9 @@ bool removeKey(MazeNode *deadMazeNode,btNode *node) {
     return flag;
 }
 
-void remove(MazeNode *deadMazeNode, btNode *node) {
+void remove(MazeNode *deadMazeNode, BTreeNode *node) {
 
-    btNode *temp;
+    BTreeNode *temp;
 
     if(!removeKey(deadMazeNode, node))
         return;
@@ -326,9 +326,9 @@ void remove(MazeNode *deadMazeNode, btNode *node) {
 
     root = node;
 }
-btNode *removeAndGetNewRoot(MazeNode *deadMazeNode, btNode *node) {
+BTreeNode *removeAndGetNewRoot(MazeNode *deadMazeNode, BTreeNode *node) {
 
-    btNode *temp;
+    BTreeNode *temp;
 
     if (!removeKey(deadMazeNode, node))
         return node;
@@ -342,9 +342,9 @@ btNode *removeAndGetNewRoot(MazeNode *deadMazeNode, btNode *node) {
     return node;
 }
 
-MazeNode *popMin(btNode *&root) {
+MazeNode *popMin(BTreeNode *&root) {
     MazeNode *min;
-    btNode *ptr = root;
+    BTreeNode *ptr = root;
 
     while (ptr->children[0] != nullptr) {
         ptr = ptr->children[0];
@@ -357,7 +357,7 @@ MazeNode *popMin(btNode *&root) {
 }
 
 
-bool isEmpty(btNode *root) {
+bool isEmpty(BTreeNode *root) {
     if(root == nullptr)
         return true;
     else
